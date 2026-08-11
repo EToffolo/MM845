@@ -366,10 +366,30 @@ $ git --version
 git version 2.4x.x
 ```
 
-### 6.2 One-time configuration
+### 6.2 Create a GitHub account
 
-Git stamps every commit with a name and email — use the ones you will register on
-GitHub:
+Do this before configuring Git, because the next step needs the email address you
+register here.
+
+Sign up at <https://github.com>. Use your **institutional address**
+(`@unicamp.br`, `@ime.unicamp.br`, …) or add it later under
+*Settings → Emails* — it is what makes you eligible for the free
+[GitHub Student Developer Pack](https://education.github.com/pack), which in turn
+gives free **GitHub Copilot** (§7.1).
+
+Enable two-factor authentication when prompted; GitHub requires it.
+
+> Git and GitHub are independent: Git is the version-control program on your
+> machine, GitHub is a company hosting Git repositories. You can use Git with no
+> account at all. The account matters from §6.4 onwards, when you start pushing
+> your work somewhere other people (and your future self, on another machine) can
+> reach it.
+
+### 6.3 One-time configuration
+
+Git stamps every commit with a name and email. Use the ones on the account you
+just created — otherwise GitHub cannot match your commits to your profile, and
+your contribution history will silently point at nobody:
 
 ```bash
 $ git config --global user.name  "<Your Name>"
@@ -378,15 +398,12 @@ $ git config --global init.defaultBranch main
 $ git config --global pull.rebase false
 ```
 
-### 6.3 Create a GitHub account
+Check what Git believes at any time with `git config --global --list`.
 
-Sign up at <https://github.com>. Use your **institutional address**
-(`@unicamp.br`, `@ime.unicamp.br`, …) or add it later under
-*Settings → Emails* — it is what makes you eligible for the free
-[GitHub Student Developer Pack](https://education.github.com/pack), which in turn
-gives free **Copilot Pro** (§7.1).
-
-Enable two-factor authentication when prompted; GitHub requires it.
+> **Privacy note.** Commit emails are public in a public repository. If you would
+> rather not expose yours, GitHub can supply a no-reply address: *Settings →
+> Emails → Keep my email addresses private* shows one of the form
+> `12345678+username@users.noreply.github.com`. Use that as `user.email` instead.
 
 ### 6.4 Authenticate your machine
 
@@ -542,21 +559,30 @@ results/
 
 Lecture 1 makes the case: syntax is no longer the barrier to entry, so your
 mathematical precision in *specifying* a problem becomes the valuable skill. Three
-levels of autonomy were distinguished — autocomplete, chat, and agents. Set up at
-least the first; the course will demonstrate all three.
+levels of autonomy were distinguished — autocomplete, chat, and agents.
 
-All three tools below are optional in the sense that the course works without them,
-but they are part of the intended workflow.
+**The course uses one assistant: GitHub Copilot.** It is free for verified students,
+it lives inside the editor you set up in §5, and it provides all three levels of
+autonomy. Set it up before Tutorial 2. Other agents exist and some will be
+demonstrated in class (§7.2), but nothing in this course requires you to pay for
+anything.
 
-### 7.1 GitHub Copilot (the course standard)
+### 7.1 GitHub Copilot
 
 Copilot lives inside VS Code and provides all three levels: inline completion, a
 chat panel, and an agent mode that edits multiple files and runs commands.
 
-1. **Get access.** Copilot has a free tier for all GitHub accounts. Apply for the
+1. **Get access.** Apply for the
    [Student Developer Pack](https://education.github.com/pack) with your Unicamp
-   address for **Copilot Pro** at no cost — approval usually takes a few days, so
-   apply early.
+   address. Verified students get the free **Copilot Student** plan — unlimited
+   code completions, plus a monthly allowance of GitHub AI Credits for chat, agent
+   mode, code review and the Copilot CLI. See the
+   [current plans](https://docs.github.com/en/copilot/get-started/plans).
+
+   **Apply early.** Verification takes days, occasionally longer, and GitHub has
+   paused new Copilot sign-ups before (April–June 2026). Until it comes through
+   you land on **Copilot Free**, which works with any GitHub account and is
+   perfectly usable for this course — just with tighter limits.
 2. **Install the extension.** In VS Code, search the Extensions panel for
    **GitHub Copilot** (`GitHub.copilot`) and install it. **GitHub Copilot Chat**
    comes with it.
@@ -572,70 +598,16 @@ chat panel, and an agent mode that edits multiple files and runs commands.
    - *Agent mode*: select **Agent** in the Chat panel's mode dropdown, then give a
      goal rather than an instruction.
 
-### 7.2 Claude Code (Anthropic)
+### 7.2 Other agents — demonstrated, not required
 
-A terminal-based agent: you describe a goal, it reads your files, writes code, runs
-it, reads the errors, and iterates.
+[Claude Code](https://claude.com/claude-code) and
+[OpenAI Codex](https://developers.openai.com/codex) are terminal agents in the same
+family, and both will be shown in the tutorial sessions so that you can see what the
+current state of the art looks like. **Both require a paid subscription**, neither
+has a student free tier, and nothing in this course needs them. Do not buy anything
+on the course's account.
 
-**Install** (macOS/Linux, or Windows via WSL or PowerShell):
-
-```bash
-# macOS / Linux
-$ curl -fsSL https://claude.ai/install.sh | bash
-```
-
-```powershell
-# Windows PowerShell
-irm https://claude.ai/install.ps1 | iex
-```
-
-<details>
-<summary>Alternative: install via npm</summary>
-
-Requires [Node.js](https://nodejs.org) 18 or later:
-
-```bash
-$ npm install -g @anthropic-ai/claude-code
-```
-</details>
-
-**Run** — from inside your project folder, so it can see your files:
-
-```bash
-$ cd ~/MM845/mm845-<yourname>
-$ claude
-```
-
-The first run prompts you to log in through a browser. It requires either a Claude
-subscription or API credits.
-
-A VS Code extension also exists (search **Claude Code** in the Extensions panel), so
-you can drive it from the editor rather than the terminal.
-
-Useful once inside: `/help` lists commands, `/init` writes a `CLAUDE.md` describing
-your project, and <kbd>Esc</kbd> interrupts it mid-task.
-
-### 7.3 Codex (OpenAI)
-
-OpenAI's coding agent, likewise available as a CLI and a VS Code extension.
-
-```bash
-$ npm install -g @openai/codex     # requires Node.js 18+
-# or, on macOS:
-$ brew install codex
-```
-
-Run it from your project folder:
-
-```bash
-$ codex
-```
-
-Sign in with a ChatGPT account (Plus/Pro/Team include usage) or an API key. The
-VS Code extension is published as **OpenAI Codex** (`openai.chatgpt`) in the
-Extensions marketplace.
-
-### 7.4 Using them properly
+### 7.3 Using it properly
 
 This part matters more than the installation. From Lecture 1, slide 10:
 
@@ -777,7 +749,8 @@ Before Tutorial 2, confirm each of the following:
 - [ ] You have a GitHub account, and `gh auth status` reports you as logged in.
 - [ ] You created, cloned, edited, committed, and pushed to `mm845-<yourname>`.
 - [ ] You cloned the course repository.
-- [ ] At least one AI assistant is installed and responds.
+- [ ] GitHub Copilot is installed in VS Code and responds (§7.1) — on the free
+      student plan, or on Copilot Free while verification is pending.
 
 If any box is unticked, bring it to the tutorial session — that is what it is for.
 
