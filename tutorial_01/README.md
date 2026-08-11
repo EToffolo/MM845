@@ -59,15 +59,17 @@ cd <folder>         # enter a folder
 cd ..               # go up one level
 ```
 
-Try creating a folder for the course now — you will clone the repository into it later:
+Try them now:
 
 ```bash
-$ cd ~
-$ mkdir -p MM845
-$ cd MM845
+$ cd ~                # go to your home directory
+$ pwd                 # confirm where you are
+$ ls                  # see what is there
 ```
 
-(`~` means your home directory on all three systems.)
+(`~` means your home directory on all three systems.) In §6.8 you will download
+the course repository here, which creates `~/MM845` — so there is no folder to
+make by hand.
 
 ---
 
@@ -407,39 +409,62 @@ Check what Git believes at any time with `git config --global --list`.
 
 ### 6.4 Authenticate your machine
 
-The simplest route is the official GitHub CLI, which handles credentials for you.
+GitHub stopped accepting account passwords over Git in 2021, so `git push` needs
+credentials of its own. The standard answer is an **SSH key**: a key pair whose
+public half you hand to GitHub and whose private half never leaves your machine.
+Set it up once and Git stops asking you for anything.
 
-| OS | Install |
-|---|---|
-| **Linux** | See <https://github.com/cli/cli/blob/trunk/docs/install_linux.md>, or `sudo apt install gh` on recent Ubuntu. |
-| **macOS** | `brew install gh` |
-| **Windows** | `winget install --id GitHub.cli`, or the installer from <https://cli.github.com>. |
-
-Then:
-
-```bash
-$ gh auth login
-```
-
-Choose **GitHub.com → HTTPS → Login with a web browser**, and follow the
-instructions. From now on `git push` and `git pull` work without asking for a
-password.
-
-<details>
-<summary>Alternative: SSH keys</summary>
+**1. Generate a key.** Press <kbd>Enter</kbd> at every prompt to accept the
+defaults (a passphrase is optional; leaving it empty is fine on a personal
+machine):
 
 ```bash
-$ ssh-keygen -t ed25519 -C "<you@example.com>"     # press Enter at every prompt
-$ cat ~/.ssh/id_ed25519.pub                        # copy the whole line
+$ ssh-keygen -t ed25519 -C "<you@example.com>"
 ```
 
-Paste it at *GitHub → Settings → SSH and GPG keys → New SSH key*. Test with:
+**2. Copy the public half.** Note the `.pub` — this is the half that is safe to
+share. Never copy the other file.
+
+```bash
+$ cat ~/.ssh/id_ed25519.pub
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... you@example.com
+```
+
+Copy that entire line.
+
+**3. Give it to GitHub.** Go to *Settings → SSH and GPG keys → New SSH key*, paste
+the line into the **Key** box, give it a title such as `laptop`, and save.
+
+**4. Test it.**
 
 ```bash
 $ ssh -T git@github.com
+Hi <your-username>! You've successfully authenticated...
 ```
 
-Then use `git@github.com:...` URLs instead of `https://github.com/...`.
+Say `yes` if asked about authenticity the first time. From now on, use the
+`git@github.com:` form of repository URLs and Git will never ask for a password.
+
+<details>
+<summary>On Windows</summary>
+
+Run these in **Git Bash** (installed with Git for Windows), not in PowerShell —
+`ssh-keygen` and the `~/.ssh/` path both behave as they do on Linux there.
+</details>
+
+<details>
+<summary>Alternative: HTTPS with a personal access token</summary>
+
+If SSH is blocked on your network, use HTTPS instead. Create a token at
+*Settings → Developer settings → Personal access tokens → Tokens (classic)* with
+the **repo** scope, then tell Git to remember it:
+
+```bash
+$ git config --global credential.helper store   # macOS: osxkeychain
+```
+
+The first `git push` asks for a username and password — give your username and
+paste the **token** as the password. Note that tokens expire and must be renewed.
 </details>
 
 ### 6.5 The everyday workflow
@@ -485,37 +510,242 @@ $ git merge tutorial-1              # bring the work in
 ### 6.7 Pull requests
 
 On GitHub, a **pull request** (PR) proposes merging one branch into another and
-displays the *diff* for review — refereeing, for code. After pushing a branch,
-GitHub shows a *"Compare & pull request"* button. Or from the terminal:
+displays the *diff* for review — refereeing, for code.
+
+Like forking, this happens on GitHub's side; Git itself has no notion of a pull
+request. Push your branch, then open the repository page — GitHub shows a
+*"Compare & pull request"* button for any branch you have recently pushed. Press
+it, write a sentence saying what the change does, and submit.
+
+### 6.8 Fork the course repository
+
+Every tutorial in this course lives in one repository, and you work in your own
+copy of it. That copy is a **fork**: your own repository on GitHub, which remembers
+where it came from.
+
+The memory is the point. **Each tutorial is published shortly before its session**,
+so the repository grows week by week, and you will collect each new tutorial with a
+single command (§6.9) — while your own work from previous weeks stays exactly where
+you left it.
+
+> You will also need a repository for the assessed mini-project, but **not yet**.
+> In week 7 you will be asked to create a public one and share it with us.
+
+The course repository is
+
+<https://github.com/TomasSilva/MM845>
+
+**Do this once.**
+
+**1. Fork it on GitHub.** Forking happens on GitHub's side, not on your machine,
+so there is no Git command for it. Open the page above while logged in and press
+**Fork** at the top right, then **Create fork**. You now own a copy at
+`https://github.com/<your-username>/MM845`.
+
+**2. Clone your fork.**
 
 ```bash
-$ gh pr create --fill
+$ cd ~
+$ git clone git@github.com:<your-username>/MM845.git
+$ cd MM845
 ```
 
-### 6.8 Do this now
+The clone creates a folder named after the repository, so you are now in
+`~/MM845`. **That folder is where you work for the rest of the course** — every
+command from here on assumes you are inside it.
 
-1. Create a repository on GitHub named `mm845-<yourname>`, ticking *"Add a README"*.
-2. Clone it, using the URL from the green **Code** button:
+**3. Add the course repository as a second remote**, so you can collect new
+tutorials from it:
+
+```bash
+$ git remote add upstream git@github.com:TomasSilva/MM845.git
+```
+
+**4. Check.**
+
+```bash
+$ git remote -v
+origin      git@github.com:<your-username>/MM845.git  (fetch)
+origin      git@github.com:<your-username>/MM845.git  (push)
+upstream    git@github.com:TomasSilva/MM845.git       (fetch)
+upstream    git@github.com:TomasSilva/MM845.git       (push)
+```
+
+Two remotes, and they mean different things:
+
+- **`origin`** is *your* fork. You push here. You have write access.
+- **`upstream`** is *ours*. You pull from here. You have no write access, which is
+  a feature — you cannot break the course materials by accident.
+
+**5. Teach Git one new command.** Collecting each week's tutorial is three
+commands (§6.9), so we bundle them into one. Paste this line exactly — it is long,
+and the code block scrolls sideways rather than wrapping:
+
+```bash
+$ git config --global alias.get-tutorial '!f() { git fetch upstream && git checkout upstream/main -- ":/$1" && (git diff --cached --quiet || git commit -m "Collect $1") && echo "OK: $1 is ready"; }; f'
+```
+
+That defines `git get-tutorial`, which you will use once a week. There is nothing
+magic about it: a Git **alias** is just a nickname for a longer command, stored in
+the same `--global` configuration as your name and email (§6.3). Read it back with
+
+```bash
+$ git config --global --get alias.get-tutorial
+```
+
+<details>
+<summary>If you set up HTTPS rather than SSH in §6.4</summary>
+
+Use the `https://` forms throughout:
+
+```bash
+$ cd ~
+$ git clone https://github.com/<your-username>/MM845.git
+$ cd MM845
+$ git remote add upstream https://github.com/TomasSilva/MM845.git
+```
+</details>
+
+> **Forks are public.** GitHub does not allow a private fork of a public
+> repository. If you would rather your working notebooks were not visible, say so
+> in the session and we will arrange a private repository with `upstream` added by
+> hand instead.
+
+### 6.9 Before every class: collect the new tutorial
+
+The repository grows as the course runs: each tutorial is published as a new
+`tutorial_n/` folder in the days before its session. So every week you collect one
+folder — and **nothing you have already done is touched**, whatever state it is in.
+
+#### The weekly routine
+
+One command, run before each session. Replace `tutorial_03` with whichever folder
+is new that week — we will tell you in class.
+
+```bash
+$ cd ~/MM845
+$ git get-tutorial tutorial_03
+OK: tutorial_03 is ready
+```
+
+That is the whole thing. Then back up your fork whenever you like:
+
+```bash
+$ git push
+```
+
+Running `git get-tutorial` twice is harmless: it simply reports that the folder is
+ready again. If you mistype the folder name, it says
+`error: pathspec ... did not match` and does nothing at all.
+
+<details>
+<summary>What the alias actually runs</summary>
+
+Nothing you could not type yourself:
+
+```bash
+$ git fetch upstream                            # 1. download our history
+$ git checkout upstream/main -- tutorial_03     # 2. take just the new folder
+$ git commit -m "Collect tutorial_03"           # 3. keep it
+```
+
+1. **`git fetch upstream`** downloads our new commits into your repository and
+   **changes none of your files**. Fetching is always safe; it is the half of
+   `git pull` that cannot hurt you.
+2. **`git checkout upstream/main -- tutorial_03`** reaches into that downloaded
+   history and takes out *exactly one folder*, placing it in your working tree
+   already staged. Because you name the folder, Git will not write anywhere else.
+3. **`git commit`** records it. No `git add` is needed — step 2 staged the files
+   for you.
+
+Use these directly if the alias ever misbehaves, or if you are on a machine where
+you have not set it up.
+</details>
+
+> **The guarantee.** It writes inside `tutorial_03/` and nowhere else. Your
+> `tutorial_02/` survives exactly as you left it — committed or not, finished or
+> not, and even if you scribbled all over the notebook we gave you. There is no
+> merge, so there is nothing to conflict.
+
+> ### ⚠ Do not press GitHub's "Sync fork" button
+>
+> Your fork's page on GitHub offers a **Sync fork** button, and it looks like
+> exactly what you want. It is not. Once your fork contains your own commits, that
+> button can offer to **discard** them so as to match our repository again — and
+> that means your work, gone, in one click.
+>
+> `git get-tutorial` never does this. Use it and ignore the button.
+
+Not sure which folder is new? Ask Git what we have been doing:
+
+```bash
+$ git log --oneline HEAD..upstream/main     # commits you do not have yet
+```
+
+<details>
+<summary>Why not just <code>git pull upstream main</code>?</summary>
+
+Because `pull` merges *everything*, and a merge can reach into files you have
+edited. Notebooks are JSON, and Git merges them line by line with no idea what a
+cell is — so if you had edited `tutorial_02/spheres.ipynb` and we later fixed a
+cell in it, `git pull` would leave a **merge conflict in the middle of that JSON**.
+Resolvable in principle; thoroughly unpleasant in practice.
+
+Naming a single folder sidesteps the whole question. You collect what is new and
+keep what is yours.
+</details>
+
+#### Working on a tutorial
+
+Once the folder has arrived, **work in a copy**:
+
+```bash
+$ cd tutorial_03
+$ cp <the-distributed-notebook>.ipynb  work_<yourname>.ipynb
+```
+
+This is a recommendation rather than a rule — the routine above protects you
+either way — but it is worth doing. It keeps your answers clearly distinguishable
+from the material, and it means the original stays pristine for reference.
+
+It also buys you an undo button. If you ever wreck a distributed file, take a
+fresh copy straight from us:
+
+```bash
+$ git checkout upstream/main -- tutorial_03/<the-distributed-notebook>.ipynb
+```
+
+> **Branches are optional here.** §6.6 is worth knowing and you should practise it,
+> but nobody else pushes to your fork, so working directly on `main` is perfectly
+> safe for the tutorials.
+
+> **Found a bug in a tutorial?** Fix it on a branch, push it, and open a pull
+> request (§6.7). It arrives as a reviewable diff — §6.7's refereeing analogy, for
+> real. Corrections from students are welcome and will be merged.
+
+### 6.10 Do this now
+
+1. Fork and clone the course repository as in §6.8, including the
+   `git get-tutorial` alias in step 5.
+2. Confirm `git remote -v` lists **both** `origin` (yours) and `upstream` (ours).
+3. Run `git get-tutorial tutorial_01`. You already have that folder, so it should
+   simply reply `OK: tutorial_01 is ready` — which confirms the alias, the
+   `upstream` remote and your network all work, before you need them next week.
+4. Make a trivial commit to check your write access to `origin`: create a file
+   `students/<yourname>.md` saying who you are and what you want from the course,
+   then
    ```bash
-   $ cd ~/MM845
-   $ git clone https://github.com/<your-username>/mm845-<yourname>.git
-   $ cd mm845-<yourname>
-   ```
-3. Edit `README.md` — add your name and a line about what you want from the course.
-4. Commit and push:
-   ```bash
-   $ git add README.md
-   $ git commit -m "Add personal introduction"
+   $ git add students/<yourname>.md
+   $ git commit -m "Add <yourname>"
    $ git push
    ```
-5. Refresh the GitHub page and confirm your change is there.
-6. Clone the **course repository** as well (URL given in class):
-   ```bash
-   $ cd ~/MM845
-   $ git clone <course-repo-url>
-   ```
+5. Refresh your fork's page on GitHub and confirm the file is there.
 
-### 6.9 What not to commit
+> **The mini-project repository comes later.** In week 7 you will be asked to
+> create a *separate*, public repository for it and share the link with us. Nothing
+> to do now.
+
+### 6.11 What not to commit
 
 Git is for *source*, not for generated output. Large binaries and data files bloat
 the history permanently, and secrets committed once stay in the history forever.
@@ -643,7 +873,7 @@ Use one repository per project, laid out predictably:
 mm845-<yourname>/
 ├── README.md            # what this is, how to run it
 ├── environment.yml      # the pinned environment (§3)
-├── .gitignore           # what Git should ignore (§6.9)
+├── .gitignore           # what Git should ignore (§6.11)
 ├── data/                # inputs; raw data ignored by Git, generators committed
 ├── src/                 # reusable functions and modules
 ├── notebooks/           # exploratory work, one notebook per tutorial
@@ -709,7 +939,13 @@ $ python -m ipykernel install --user --name aigeo --display-name "Python (aigeo)
 ```
 
 **`git push` asks for a password and rejects it**
-GitHub removed password authentication for Git. Use `gh auth login` (§6.4) or SSH.
+GitHub removed password authentication for Git in 2021. Set up an SSH key (§6.4),
+and check that your remote uses the `git@github.com:` form — `git remote -v` will
+tell you. To switch an existing clone over:
+
+```bash
+$ git remote set-url origin git@github.com:<your-username>/MM845.git
+```
 
 **PowerShell refuses to run a script** (`running scripts is disabled`)
 
@@ -746,9 +982,14 @@ Before Tutorial 2, confirm each of the following:
 - [ ] The $S^2$ sampling snippet in §4 runs and produces a picture.
 - [ ] VS Code opens your course folder and its interpreter is set to `aigeo`.
 - [ ] `git --version` works and `git config --global user.name` returns your name.
-- [ ] You have a GitHub account, and `gh auth status` reports you as logged in.
-- [ ] You created, cloned, edited, committed, and pushed to `mm845-<yourname>`.
-- [ ] You cloned the course repository.
+- [ ] You have a GitHub account, and `ssh -T git@github.com` greets you by name.
+- [ ] You forked and cloned the course repository, and `git remote -v` shows both
+      `origin` (yours) and `upstream` (ours).
+- [ ] `git get-tutorial tutorial_01` replies `OK: tutorial_01 is ready`.
+- [ ] You committed and pushed `students/<yourname>.md` to your fork, and can see
+      it on GitHub.
+- [ ] You know the weekly routine (§6.9): **`git get-tutorial tutorial_n`** before
+      each class — and that GitHub's "Sync fork" button is not a substitute.
 - [ ] GitHub Copilot is installed in VS Code and responds (§7.1) — on the free
       student plan, or on Copilot Free while verification is pending.
 
