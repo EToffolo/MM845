@@ -1,3 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data and results — regenerate these, do not version them
+data/raw/
+results/
+*.npy
+*.npz
+*.pt
+*.ckpt
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Secrets — never commit these
+.env
+*.key
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
